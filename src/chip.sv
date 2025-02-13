@@ -9,7 +9,7 @@ module my_chip (
     logic [9:0] high_q;
     logic [9:0] low_q;
     logic [9:0] data_in;
-    assign data_in = io_in[9:0]
+    assign data_in = io_in[9:0];
     logic go_started;
     logic debug_error = 1'b0;
     logic go;
