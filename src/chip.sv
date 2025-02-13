@@ -6,43 +6,43 @@ module my_chip (
     input logic clock,
     input logic reset // Important: Reset is ACTIVE-HIGH
 );
-    
-    // Basic counter design as an example
-    // TODO: remove the counter design and use this module to insert your own design
-    // DO NOT change the I/O header of this design
+    logic [9:0] high_q;
+    logic [9:0] low_q;
+    logic [9:0] data_in;
+    assign data_in = io_in[9:0]
+    logic go_started;
+    logic debug_error = 1'b0;
+    logic go;
+    logic finish;
+    assign go = io_in[10];
+    assign finish = io_in[11];
 
-    wire [6:0] led_out;
-    assign io_out[6:0] = led_out;
+    assign io_out[9:0] = high_q - low_q;
 
-    // external clock is 1000Hz, so need 10 bit counter
-    reg [9:0] second_counter;
-    reg [3:0] digit;
-
-    always @(posedge clock) begin
-        // if reset, set counter to 0
-        if (reset) begin
-            second_counter <= 0;
-            digit <= 0;
+    always_comb begin
+        if (debug_error) begin
+            debug_error = (go && !finish) ? 1'b0 : 1'b1;
         end else begin
-            // if up to 16e6
-            if (second_counter == 1000) begin
-                // reset
-                second_counter <= 0;
-
-                // increment digit
-                digit <= digit + 1'b1;
-
-                // only count from 0 to 9
-                if (digit == 9)
-                    digit <= 0;
-
-            end else
-                // increment counter
-                second_counter <= second_counter + 1'b1;
+            debug_error = ((go && finish) || (finish && !go_started)) ? 1'b1 : 1'b0;
         end
     end
 
-    // instantiate segment display
-    seg7 seg7(.counter(digit), .segments(led_out));
+    // Sequential Logic
+    always_ff @(posedge clock, posedge reset) begin
+        if (reset) begin
+            go_started <= 1'b0;
+        end else begin
+            if (!debug_error) begin
+                if (go && !go_started) begin
+                    go_started <= 1'b1;
+                    high_q <= data_in;
+                    low_q <= data_in;
+                end
+                if (finish) go_started <= 1'b0;
+                if (data_in < low_q) low_q <= data_in;
+                if (data_in > high_q) high_q <= data_in;
+            end
+        end
+    end    
 
 endmodule
