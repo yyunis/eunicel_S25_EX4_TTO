@@ -11,7 +11,7 @@ module my_chip (
     logic [9:0] data_in;
     assign data_in = io_in[9:0];
     logic go_started;
-    logic debug_error = 1'b0;
+    logig debug_error;
     logic go;
     logic finish;
     assign go = io_in[10];
@@ -20,6 +20,7 @@ module my_chip (
     assign io_out[9:0] = high_q - low_q;
 
     always_comb begin
+        debug_error = 1'b0;
         if (debug_error) begin
             debug_error = (go && !finish) ? 1'b0 : 1'b1;
         end else begin
