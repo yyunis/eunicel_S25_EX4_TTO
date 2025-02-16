@@ -11,7 +11,7 @@ module my_chip (
     logic [9:0] data_in;
     assign data_in = io_in[9:0];
     logic go_started;
-    logig debug_error;
+    logic debug_error;
     logic go;
     logic finish;
     assign go = io_in[10];
